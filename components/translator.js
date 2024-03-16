@@ -33,15 +33,14 @@ class Translator {
     const wrapHighlight = (translatedText) => highlight ? `<span class="highlight">${translatedText}</span>` : translatedText;
 
     Object.keys(titlesDict).forEach(title => {
-      //const regex = new RegExp(`\\b${title}(\\.)?\\b`, 'gi');
       const regex = new RegExp(`(^|\\s)${title}(\\.)?(\\s|$)`, 'gi');
 
-      text = text.replace(regex, (match, start, titleText, period, end) => {
-        console.log(`match, start, titleText, p, end: ${match} ${start} ${titleText} ${period} ${end}`);
+      text = text.replace(regex, (match, leadingSpace, titleText, period, trailingSpace) => {
         let replacement = titlesDict[title];
         let capitalizedReplacement = replacement.charAt(0).toUpperCase() + replacement.slice(1);
-        let periodToAdd = locale === 'british-to-american' && period ? '.' : '';
-        return  `${start}${wrapHighlight(capitalizedReplacement)}${periodToAdd}${end}`;
+        let spaceBefore = leadingSpace === '' ? '' : ' ';
+        let spaceAfter = trailingSpace === '' ? '' : ' ';
+        return `${spaceBefore}${wrapHighlight(capitalizedReplacement)}${spaceAfter}`;
       });
     });
 
@@ -56,10 +55,9 @@ class Translator {
     });
 
     // translate words and phrases
-    Object.keys(dict).forEach(wordOrPhrase => {
+    Object.keys(dict).sort((a,b) => b.length - a.length).forEach(wordOrPhrase => {
       const regex = new RegExp(`\\b${wordOrPhrase}\\b`, 'gi');
       text = text.replace(regex, (match) => {
-//        console.log(dict[wordOrPhrase]);
         return wrapHighlight(dict[wordOrPhrase]);
       });
     });
