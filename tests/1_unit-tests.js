@@ -99,6 +99,6 @@ suite('Unit Tests', () => {
   })
 
   test('Highlight translation in Paracetamol takes up to an hour to work.', () => {
-    assert.equal(translator.translate('Paracetamol takes up to an hour to work.', 'british-to-american'), '<span class=\"highlight\">Tylenol</span> takes up to an hour to work.');
+    assert.equal(translator.translate('Paracetamol takes up to an hour to work.', 'british-to-american', true), '<span class=\"highlight\">Tylenol</span> takes up to an hour to work.');
   })
 });

@@ -18,7 +18,7 @@ class Translator {
     }, {});
   }
 
-  translate(text, locale) {
+  translate(text, locale, highlight = false) {
     let dict, titlesDict;
     if (locale === 'american-to-british') {
       dict = this.americanDict;
@@ -27,27 +27,29 @@ class Translator {
       dict = this.britishDict;
       titlesDict = this.invertDict(this.titleDict);
     } else {
-      "Invalid locale";
+      { error: 'Invalid value for locale field' };
     }
 
-    Object.keys(titlesDict).forEach(title => {
-      // Adjusted regex to correctly capture an optional period after the title
-      const regex = new RegExp(`\\b${title}(\\.)?\\b`, 'gi');
+    const wrapHighlight = (translatedText) => highlight ? `<span class="highlight">${translatedText}</span>` : translatedText;
 
-      // Using a replacement function to handle the optional period
-      text = text.replace(regex, (match, p1) => {
-        console.log(`match, p1: ${match} ${p1}`);
-        let capitalizedTitle = titlesDict[title].charAt(0).toUpperCase() + titlesDict[title].slice(1);
-        return  capitalizedTitle + (p1 ? '.' : '');
+    Object.keys(titlesDict).forEach(title => {
+      //const regex = new RegExp(`\\b${title}(\\.)?\\b`, 'gi');
+      const regex = new RegExp(`(^|\\s)${title}(\\.)?(\\s|$)`, 'gi');
+
+      text = text.replace(regex, (match, start, titleText, period, end) => {
+        console.log(`match, start, titleText, p, end: ${match} ${start} ${titleText} ${period} ${end}`);
+        let replacement = titlesDict[title];
+        let capitalizedReplacement = replacement.charAt(0).toUpperCase() + replacement.slice(1);
+        let periodToAdd = locale === 'british-to-american' && period ? '.' : '';
+        return  `${start}${wrapHighlight(capitalizedReplacement)}${periodToAdd}${end}`;
       });
     });
 
-    // handle titles and times separately
     text = text.replace(/\b\d{1,2}[:.]\d{2}\b/g, (match) => {
       if (locale == 'american-to-british') {
-        return match.replace(':', '.');
+        return wrapHighlight(match.replace(':', '.'));
       } else if (locale == 'british-to-american') {
-        return match.replace('.',':');
+        return wrapHighlight(match.replace('.',':'));
       } else {
         return match;
       };
@@ -56,22 +58,13 @@ class Translator {
     // translate words and phrases
     Object.keys(dict).forEach(wordOrPhrase => {
       const regex = new RegExp(`\\b${wordOrPhrase}\\b`, 'gi');
-      text = text.replace(regex, dict[wordOrPhrase]);
+      text = text.replace(regex, (match) => {
+//        console.log(dict[wordOrPhrase]);
+        return wrapHighlight(dict[wordOrPhrase]);
+      });
     });
     return text;
   }
-
-  // capitalizeTitle(obj) {
-  //   let capitalizedTitles = {};
-  //   Object.entries(obj).forEach(([key, value]) => {
-  //     let capitalizedKey = key.charAt(0).toUpperCase() + key.slice(1);
-  //     let capitalizedValue = value.charAt(0).toUpperCase() + value.slice(1);
-  //     capitalizedTitles[capitalizedKey] = capitalizedValue;
-  //   });
-  //   return capitalizedTitles;
-  // }
-
-
 }
 
 module.exports = Translator;

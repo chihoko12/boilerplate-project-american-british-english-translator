@@ -19,7 +19,7 @@ suite('Functional Tests', () => {
       })
       .end((err,res) => {
         assert.equal(res.status, 200);
-        assert.equal(res.body.translation, 'Mangoes are my favourite fruit.');
+        assert.equal(res.body.translation, 'Mangoes are my <span class=\"highlight\">favourite</span> fruit.');
         done();
       });
   });
@@ -62,7 +62,7 @@ suite('Functional Tests', () => {
       })
       .end((err, res) => {
         assert.equal(res.status, 200);
-        assert.equal(res.body.error, 'Invalid value for locale field');
+        assert.equal(res.body.error, 'Required field(s) missing');
         done();
       });
   });

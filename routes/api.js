@@ -20,9 +20,13 @@ module.exports = function (app) {
         return res.json({ error: 'No text to translate' });
       }
 
+      if (! (locale === 'american-to-british' || locale === 'british-to-american') ) {
+        return res.json({ error: 'Invalid value for locale field' });
+      }
+
       try {
         // perform the translation
-        const translation = translator.translate(text, locale);
+        const translation = translator.translate(text, locale, true);
 
         // check if translation was needed
         if (translation === text) {
@@ -30,15 +34,10 @@ module.exports = function (app) {
         } else {
           return res.json({ text, translation});
         }
+
       } catch (e) {
-        // handle invalid locale or other errors
-        if (e.message === 'Invalid locale') {
-          return res.json({ error: 'Invalid value for locale field' });
-        } else {
-          // generic error handling
           console.error(e);
           return res.status(500).json({ error: 'Internal Server Error' });
-        }
       }
     });
 };
